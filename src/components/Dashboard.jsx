@@ -1,7 +1,8 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import MultiSelectWithCheckboxes from './multiSelect';
 
 class Dashboard extends React.Component {
     render() {
@@ -21,7 +22,28 @@ class Dashboard extends React.Component {
                     quasi quidem quibusdam.
                 </Typography>
                 <Link to="/logout">Logout</Link>
-            </Box>
+                <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                        <MultiSelectWithCheckboxes label="Select Box 1" items={['Item 1', 'Item 2', 'Item 3', 'Item 4']}>
+                            <MultiSelectWithCheckboxes.SelectAll />
+                            <MultiSelectWithCheckboxes.ClearAll />
+                            {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map(item => (
+                                <MultiSelectWithCheckboxes.SelectItem key={item} item={item} />
+                            ))}
+                        </MultiSelectWithCheckboxes>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <MultiSelectWithCheckboxes label="Select Box 2" items={['Item 1', 'Item 2', 'Item 3', 'Item 4']}>
+                            <MultiSelectWithCheckboxes.SelectAll />
+                            <MultiSelectWithCheckboxes.ClearAll />
+                            {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map(item => (
+                                <MultiSelectWithCheckboxes.SelectItem key={item} item={item} />
+                            ))}
+                        </MultiSelectWithCheckboxes>
+                    </Grid>
+                </Grid>
+
+            </Box >
         );
     }
 }
