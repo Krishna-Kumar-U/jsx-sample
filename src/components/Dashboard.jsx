@@ -1,57 +1,84 @@
-import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
-import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid } from '@mui/material';
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import MultiSelectWithCheckboxes from './multiSelect';
+import DateRangeDropdown from './Filters/DateRangeDropDown';
+import { ConstructionTypes } from './Filters/Constants/Construction';
+import { Filters } from './Filters/Signals/Filter';
 
-class Dashboard extends React.Component {
-    render() {
-        const { user } = this.props;
-        return (
-            <Box sx={{ width: '100%' }}>
-                <Typography variant="h1" gutterBottom>
-                    Dashboard
-                </Typography>
-                <Typography variant="h3" gutterBottom>
-                    {user && `Welcome, ${user.username}!`}
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos
-                    blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur,
-                    neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum
-                    quasi quidem quibusdam.
-                </Typography>
-                <Link to="/logout">Logout</Link>
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <MultiSelectWithCheckboxes label="Select Box 1" items={['Item 1', 'Item 2', 'Item 3', 'Item 4']}>
-                            <MultiSelectWithCheckboxes.SelectAll />
-                            <MultiSelectWithCheckboxes.ClearAll />
-                            {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map(item => (
-                                <MultiSelectWithCheckboxes.SelectItem key={item} item={item} />
-                            ))}
-                        </MultiSelectWithCheckboxes>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <MultiSelectWithCheckboxes label="Select Box 2" items={['Item 1', 'Item 2', 'Item 3', 'Item 4']}>
-                            <MultiSelectWithCheckboxes.SelectAll />
-                            <MultiSelectWithCheckboxes.ClearAll />
-                            {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map(item => (
-                                <MultiSelectWithCheckboxes.SelectItem key={item} item={item} />
-                            ))}
-                        </MultiSelectWithCheckboxes>
-                    </Grid>
+
+const Dashboard = ({ user }) => {
+    const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm();
+
+
+    const onSubmit = (data) => {
+        console.log(Filters.value);
+    };
+
+    return (
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%', m: 4 }}>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs={2}>
+                    <Controller
+                        name="constructionType"
+                        control={control}
+                        defaultValue={ConstructionTypes}
+                        render={({ field }) => (
+                            <MultiSelectWithCheckboxes {...register('constructionType')} label="Construction Type" filters={Filters} items={ConstructionTypes} {...field}>
+                                <Box display="flex" justifyContent="flex-end">
+                                    <MultiSelectWithCheckboxes.SelectAll />
+                                    <MultiSelectWithCheckboxes.ClearAll />
+                                </Box>
+                                <Grid container>
+                                    {ConstructionTypes.map(item => (
+                                        <Grid item xs={6} key={item.name}>
+                                            <MultiSelectWithCheckboxes.SelectItem item={item} >
+                                                {item.label}
+                                            </MultiSelectWithCheckboxes.SelectItem>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </MultiSelectWithCheckboxes>
+                        )}
+                    />
+
                 </Grid>
+                <Grid item xs={2}>
+                    <Controller
+                    name="permitDate"
+                    control={control}
+                    render={({ field }) => (
+                        <DateRangeDropdown {...register('permitDate')} label="Permit Date" {...field} />
+                    )}
+                    />
+                </Grid>
+                <Grid item xs={2}>
+                    ds
+                </Grid>
+                <Grid item xs={2}>
+                <Controller
+                    name="endDate"
+                    control={control}
+                    render={({ field }) => (
+                        <DateRangeDropdown {...register('endDate')} label="End Date" {...field} />
+                    )}
+                    />
+                    
+                </Grid>
+                <Grid item xs={2}>
+                    <FormControlLabel {...register('builderOnly')} control={<Checkbox />} label="w/Builder Only"
+                        sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                    />
+                </Grid>
+                <Grid item xs={2}>
+                    <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
+                        {isSubmitting ? <CircularProgress size={24} /> : 'Search'}
+                    </Button>
+                </Grid>
+            </Grid>
 
-            </Box >
-        );
-    }
+        </Box >
+    );
 }
 
-const mapStateToProps = (state) => {
-    return {
-        user: state.user,
-    }
-};
-
-export default connect(mapStateToProps)(Dashboard);
+export default Dashboard;

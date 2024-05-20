@@ -28,9 +28,7 @@ class App extends Component {
               <CssBaseline />
               <Router>
                 <Routes>
-                  <Route path="/" element={<ProtectedRoute />} >
-                    <Route path="/" element={<Dashboard />} />
-                  </Route>
+                <Route path="/" element={<Dashboard />} />
                   <Route
                     path="/login"
                     element={<LoginWithNavigation />}

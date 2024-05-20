@@ -3,20 +3,22 @@ import { Checkbox, FormControl, InputLabel, Select, MenuItem, Button, Grid } fro
 
 const MultiSelectWithCheckboxesContext = createContext();
 
-function MultiSelectWithCheckboxes({ children, items, label }) {
-    const [selectedItems, setSelectedItems] = useState([]);
+const MultiSelectWithCheckboxes = React.forwardRef(({ children, items, label, filters }, ref) => {
 
+    const [selectedItems, setSelectedItems] = useState(items);
     const handleSelectChange = useCallback((event) => {
-        console.log('handleSelectChange event.target.value:', event.target.value);
         setSelectedItems(event.target.value);
+        filters.value.constructionType = event.target.value;
     }, []);
 
     const handleSelectAll = useCallback(() => {
         setSelectedItems(items);
+        filters.value.constructionType = items;
     }, [items]);
 
     const handleClearAll = useCallback(() => {
         setSelectedItems([]);
+        filters.value.constructionType = [];
     }, []);
 
     const value = useMemo(() => ({ selectedItems, handleSelectChange, handleSelectAll, handleClearAll }), [selectedItems, handleSelectChange, handleSelectAll, handleClearAll]);
@@ -26,18 +28,19 @@ function MultiSelectWithCheckboxes({ children, items, label }) {
                 <InputLabel>{label}</InputLabel>
                 <Select
                     multiple
+                    label={label}
                     value={selectedItems}
                     onChange={handleSelectChange}
-                    renderValue={(selected) => selected.join(', ')}
+                    renderValue={(selected) => selected.length === items.length ? 'All' : selected.map(item => item.name).join(', ')}
                 >
                     {children}
                 </Select>
             </FormControl>
         </MultiSelectWithCheckboxesContext.Provider>
     );
-}
+});
 
-const SelectItem = React.memo(function SelectItem({ item }) {
+const SelectItem = React.memo(function SelectItem({ item, children }) {
     const { selectedItems, handleSelectChange } = useContext(MultiSelectWithCheckboxesContext);
 
     const handleMouseUp = () => {
@@ -52,7 +55,7 @@ const SelectItem = React.memo(function SelectItem({ item }) {
         <Grid item xs={4} key={item}>
             <MenuItem value={item} onMouseUp={handleMouseUp}>
                 <Checkbox checked={selectedItems.includes(item)} />
-                {item}
+                {children}
             </MenuItem>
         </Grid>
     );
@@ -61,16 +64,26 @@ const SelectItem = React.memo(function SelectItem({ item }) {
 function SelectAll() {
     const { handleSelectAll } = useContext(MultiSelectWithCheckboxesContext);
 
+    const handleClick = (event) => {
+        event.stopPropagation();
+        handleSelectAll();
+    };
+
     return (
-        <Button onClick={handleSelectAll}>Select All</Button>
+        <Button onClick={handleClick}>Select All</Button>
     );
 }
 
 function ClearAll() {
     const { handleClearAll } = useContext(MultiSelectWithCheckboxesContext);
 
+    const handleClick = (event) => {
+        event.stopPropagation();
+        handleClearAll();
+    };
+
     return (
-        <Button onClick={handleClearAll}>Clear All</Button>
+        <Button onClick={handleClick}>Clear All</Button>
     );
 }
 
