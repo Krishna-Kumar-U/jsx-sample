@@ -1,18 +1,20 @@
-import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid } from '@mui/material';
-import React, { useState } from 'react';
+import { Autocomplete, Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, MenuItem, TextField, Typography } from '@mui/material';
+import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import MultiSelectWithCheckboxes from './multiSelect';
+import MultiSelectWithCheckboxes from './Filters/multiSelect';
 import DateRangeDropdown from './Filters/DateRangeDropDown';
 import { ConstructionTypes } from './Filters/Constants/Construction';
-import { Filters } from './Filters/Signals/Filter';
+import { BUILDER_ONLY_FILTER, BUILD_VALUE_FILTER, CONSTRUCTION_TYPE_FILTER, END_DATE_FILTER, Filters, PERMIT_DATE_FILTER } from './Filters/Signals/Filter';
+import PriceRangeSelect from './Filters/PriceRangeSelect';
+import { BUILD_VALUE_OPTIONS } from './Filters/Constants/BuildValue';
+import PriceRangeSelector from './Filters/PriceRangeSelector';
 
 
-const Dashboard = ({ user }) => {
-    const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm();
-
-
-    const onSubmit = (data) => {
-        console.log(Filters.value);
+const Dashboard = () => {
+    const { register, handleSubmit, control, formState: { isSubmitting } } = useForm();
+    const onSubmit = () => {
+        const jsonObject = JSON.stringify(Filters);
+        console.log(jsonObject);
     };
 
     return (
@@ -24,12 +26,12 @@ const Dashboard = ({ user }) => {
                         control={control}
                         defaultValue={ConstructionTypes}
                         render={({ field }) => (
-                            <MultiSelectWithCheckboxes {...register('constructionType')} label="Construction Type" filters={Filters} items={ConstructionTypes} {...field}>
+                            <MultiSelectWithCheckboxes filterName={CONSTRUCTION_TYPE_FILTER} {...register('constructionType')} label="Construction Type" filters={Filters} items={ConstructionTypes} {...field}>
                                 <Box display="flex" justifyContent="flex-end">
                                     <MultiSelectWithCheckboxes.SelectAll />
                                     <MultiSelectWithCheckboxes.ClearAll />
                                 </Box>
-                                <Grid container>
+                                <Grid sx={{ width: '350px' }} container>
                                     {ConstructionTypes.map(item => (
                                         <Grid item xs={6} key={item.name}>
                                             <MultiSelectWithCheckboxes.SelectItem item={item} >
@@ -45,29 +47,34 @@ const Dashboard = ({ user }) => {
                 </Grid>
                 <Grid item xs={2}>
                     <Controller
-                    name="permitDate"
-                    control={control}
-                    render={({ field }) => (
-                        <DateRangeDropdown {...register('permitDate')} label="Permit Date" {...field} />
-                    )}
+                        name="permitDate"
+                        control={control}
+                        render={({ field }) => (
+                            <DateRangeDropdown filterName={PERMIT_DATE_FILTER} filters={Filters} {...register('permitDate')} label="Permit Date" {...field} />
+                        )}
                     />
                 </Grid>
                 <Grid item xs={2}>
-                    ds
+                    <PriceRangeSelect options={BUILD_VALUE_OPTIONS} filterName={BUILD_VALUE_FILTER} filters={Filters}>
+                    <MenuItem>
+                         <PriceRangeSelector filterName={BUILD_VALUE_FILTER} filters={Filters} options={BUILD_VALUE_OPTIONS} />
+                    </MenuItem>
+                   
+                    </PriceRangeSelect>
                 </Grid>
                 <Grid item xs={2}>
-                <Controller
-                    name="endDate"
-                    control={control}
-                    render={({ field }) => (
-                        <DateRangeDropdown {...register('endDate')} label="End Date" {...field} />
-                    )}
+                    <Controller
+                        name="endDate"
+                        control={control}
+                        render={({ field }) => (
+                            <DateRangeDropdown filters={Filters} filterName={END_DATE_FILTER} {...register('endDate')} label="End Date" {...field} />
+                        )}
                     />
-                    
+
                 </Grid>
                 <Grid item xs={2}>
-                    <FormControlLabel {...register('builderOnly')} control={<Checkbox />} label="w/Builder Only"
-                        sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                    <FormControlLabel {...register('builderOnly')} control={<Checkbox />} onChange={(event) => { Filters[BUILDER_ONLY_FILTER].value = event.target.checked }}
+                        label="w/Builder Only" sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
                     />
                 </Grid>
                 <Grid item xs={2}>

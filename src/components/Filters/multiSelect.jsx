@@ -3,22 +3,22 @@ import { Checkbox, FormControl, InputLabel, Select, MenuItem, Button, Grid } fro
 
 const MultiSelectWithCheckboxesContext = createContext();
 
-const MultiSelectWithCheckboxes = React.forwardRef(({ children, items, label, filters }, ref) => {
+const MultiSelectWithCheckboxes = React.forwardRef(({ filterName, children, items, label, filters }, ref) => {
 
     const [selectedItems, setSelectedItems] = useState(items);
     const handleSelectChange = useCallback((event) => {
         setSelectedItems(event.target.value);
-        filters.value.constructionType = event.target.value;
+        filters[filterName].value = event.target.value;
     }, []);
 
     const handleSelectAll = useCallback(() => {
         setSelectedItems(items);
-        filters.value.constructionType = items;
+        filters[filterName].value = items;
     }, [items]);
 
     const handleClearAll = useCallback(() => {
         setSelectedItems([]);
-        filters.value.constructionType = [];
+        filters[filterName].value = [];
     }, []);
 
     const value = useMemo(() => ({ selectedItems, handleSelectChange, handleSelectAll, handleClearAll }), [selectedItems, handleSelectChange, handleSelectAll, handleClearAll]);

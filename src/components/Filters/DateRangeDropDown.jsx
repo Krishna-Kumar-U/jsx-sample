@@ -1,15 +1,14 @@
 import React, { forwardRef, useRef, useState } from 'react';
-import { Select, MenuItem, FormControl, InputLabel, Popover } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel, Popover, Box } from '@mui/material';
 import { DateRangePicker } from 'react-date-range';
-import { sub, format } from 'date-fns';
-import 'react-date-range/dist/styles.css'; // main css file
-import 'react-date-range/dist/theme/default.css'; // theme css file
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import './dateRangePicker.css';
 import { DATE_OPTIONS, formatDate, calculateDate } from './Constants/date';
-import {Filters} from './Signals/Filter';
+import { Filters } from './Signals/Filter';
 
 
-const DateRangeDropdown = forwardRef(({ name, label }, ref) => {
+const DateRangeDropdown = forwardRef(({ filterName, label }, ref) => {
     const [selectedOption, setSelectedOption] = useState('');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const anchorEl = useRef(null);
@@ -30,12 +29,14 @@ const DateRangeDropdown = forwardRef(({ name, label }, ref) => {
     };
 
     const handleMenuItemClick = (event) => {
-        const value = event.target.value;
+        let value = event.target.value;
+        if(value === 0) value = 'Custom Date';// this is a hack to fix the issue second time click of custom date option
         setSelectedOption(value)
         if (value === 'Custom Date') {
             handleOpen(event);
             return;
         }
+        
 
     };
 
@@ -55,47 +56,34 @@ const DateRangeDropdown = forwardRef(({ name, label }, ref) => {
         ));
     };
 
+    const formatSelectedDate = (selected) => {
+        let formattedDate = null;
+        if (selected === 'Custom Date') {
+            const startDate = formatDate(state[0].startDate);
+            const endDate = formatDate(state[0].endDate);
+            formattedDate = endDate ? `${startDate} - ${endDate}` : startDate;
+        }
+        if (typeof selected === 'string' && selected.includes('months')) {
+            formattedDate = calculateDate(selected);
+        }
+        Filters[filterName].value = formattedDate;
+        return formattedDate;
+    };
+
     return (
-        <div>
+        <Box>
             <FormControl fullWidth>
                 <InputLabel>{label}</InputLabel>
-                <Select
-                    label={label}
-                    value={selectedOption}
-                    onChange={handleMenuItemClick}
-                    renderValue={(selected) => {
-                        let formattedDate = null;
-                        if (selected === 'Custom Date') {
-                            const startDate = formatDate(state[0].startDate);
-                            const endDate = formatDate(state[0].endDate);
-                            formattedDate = endDate ? `${startDate} - ${endDate}` : startDate;
-                        }
-                        if (typeof selected === 'string' && selected.includes('months')) {
-                            formattedDate =  calculateDate(selected);
-                        }
-                        Filters.value[name] = formattedDate; 
-                        return formattedDate;
-                    }}
-                    ref={anchorEl}
-                >
-
-{renderMenuItems()}
-                    <MenuItem
-
-                        value="Custom Date"
-                        onClick={handleMenuItemClick}
-                    >
+                <Select label={label}  value={selectedOption} onChange={handleMenuItemClick} renderValue={formatSelectedDate} ref={anchorEl}>
+                    {renderMenuItems()}
+                    <MenuItem value="Custom Date" onClick={handleMenuItemClick}>
                         Custom Date
                     </MenuItem>
                 </Select>
             </FormControl>
 
-            <Popover
-                open={isPopoverOpen}
-                anchorEl={anchorEl.current}
-                onClose={handleClose}
-            >
-                <div>
+            <Popover open={isPopoverOpen} anchorEl={anchorEl.current} onClose={handleClose}>
+                <Box>
                     <DateRangePicker
                         showSelectionPreview={false}
                         moveRangeOnFirstSelection={false}
@@ -108,9 +96,9 @@ const DateRangeDropdown = forwardRef(({ name, label }, ref) => {
                         staticRanges={[]}
                         onChange={handleDateRangeChange}
                     />
-                </div>
+                </Box>
             </Popover>
-        </div>
+        </Box>
 
     );
 });
